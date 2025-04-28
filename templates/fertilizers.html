@@ -123,27 +123,32 @@
 
         .input-section {
             margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
         }
 
         input {
             width: 70%;
-            padding: 10px;
-            font-size: 16px;
+            padding: 12px;
+            font-size: 18px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            box-sizing: border-box;
         }
 
         button {
-            padding: 10px 15px;
-            font-size: 16px;
+            padding: 12px 20px;
+            font-size: 18px;
             cursor: pointer;
             background: #388e3c;
             color: white;
             border: none;
             border-radius: 5px;
-            margin-left: 5px;
             transition: background-color 0.3s, transform 0.3s;
             position: relative;
+            min-width: 50px;
         }
 
         button:hover {
@@ -161,13 +166,17 @@
             max-height: 100px;
             overflow-y: auto;
             margin-top: 10px;
+            width: 70%;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .suggestion-item {
-            padding: 5px;
+            padding: 8px;
             cursor: pointer;
             background: #eee;
             border-bottom: 1px solid #ccc;
+            font-size: 16px;
         }
 
         .suggestion-item:hover {
@@ -178,15 +187,17 @@
             padding: 10px;
             border-top: 2px solid #2e7d32;
             text-align: left;
+            font-size: 18px;
         }
 
         .output-section h2 {
             color: #2e7d32;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
         }
 
         .output-section p {
-            margin: 5px 0;
+            margin: 8px 0;
+            line-height: 1.5;
         }
 
         footer {
@@ -305,7 +316,11 @@
             }
 
             .output-section h2 {
-                font-size: 1.2rem;
+                font-size: 1.4rem;
+            }
+
+            .output-section {
+                font-size: 16px;
             }
 
             input {
@@ -314,8 +329,13 @@
             }
 
             button {
+                width: 48%;
+                margin: 5px 1%;
+                padding: 10px;
+            }
+
+            #suggestions {
                 width: 100%;
-                margin: 5px 0;
             }
 
             footer {
@@ -356,18 +376,25 @@
         <div class="container">
             <h1 id="containerTitle">Crop Fertilizer & Pest Info</h1>
             <div class="input-section">
-                <input type="text" id="cropInput" placeholder="Enter or Speak Crop Name..." onkeyup="suggestCrops()">
-                <button onclick="startSpeechRecognition()"><i class="fas fa-microphone"></i></button>
-                <div id="suggestions"></div>
+                <input type="text" id="cropInput" placeholder="Enter or Speak Crop Name..." onkeyup="suggestCrops()" aria-label="Enter crop name">
+                <button onclick="getCropDetails(document.getElementById('cropInput').value)" role="button" tabindex="0" aria-label="Search crop information">
+                    <i class="fas fa-search"></i>
+                    <span class="tooltip">Search Crop</span>
+                </button>
+                <button onclick="startSpeechRecognition()" role="button" tabindex="0" aria-label="Speak crop name">
+                    <i class="fas fa-microphone"></i>
+                    <span class="tooltip">Speak Crop Name</span>
+                </button>
+                <div id="suggestions" role="listbox" aria-label="Crop suggestions"></div>
             </div>
-            <div class="output-section" id="output">
+            <div class="output-section" id="output" role="region" aria-live="polite">
                 <!-- Output will be populated here -->
             </div>
         </div>
     </div>
 
     <!-- Move to Top Button -->
-    <button class="move-to-top" id="moveToTop" onclick="scrollToTop()">
+    <button class="move-to-top" id="moveToTop" onclick="scrollToTop()" role="button" tabindex="0" aria-label="Back to top">
         <i class="fas fa-arrow-up"></i> <span id="moveToTopText"></span>
     </button>
 
@@ -375,96 +402,20 @@
     <footer id="footer">
         <p id="teamDesc"></p>
         <div class="contact-links">
-            <a href="mailto:shivakumar.working@gmail.com"><i class="fas fa-envelope"></i><span id="footerEmail"></span></a>
+            <a href="/cdn-cgi/l/email-protection#2c5f44445a4d4759414d5e025b435e4745424b6c4b414d4540024f4341"><i class="fas fa-envelope"></i><span id="footerEmail"></span></a>
             <a href="https://github.com/shivkumars005" target="_blank"><i class="fab fa-github"></i><span id="footerGithub"></span></a>
             <a href="https://linkedin.com/in/shivakumarsouta" target="_blank"><i class="fab fa-linkedin"></i><span id="footerLinkedin"></span></a>
             <a href="#"><i class="fas fa-map-marker-alt"></i><span id="footerLocation"></span></a>
         </div>
     </footer>
 
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
     <script>
-        const cropData = {
-            "Wheat": {
-                fertilizers: "Urea, DAP, Potash",
-                time: "Apply Urea during early growth, DAP before sowing.",
-                pests: "Aphids, Armyworms",
-                prevention: "Use neem oil spray, monitor fields regularly."
-            },
-            "Paddy": {
-                fertilizers: "Urea, Potash, Super Phosphate",
-                time: "Apply Urea in 3 splits: early, mid, and late stage.",
-                pests: "Brown Planthopper, Stem Borer",
-                prevention: "Avoid over-irrigation, use light traps."
-            },
-            "Tomato": {
-                fertilizers: "NPK (Nitrogen, Phosphorus, Potassium), Calcium Nitrate",
-                time: "Apply NPK during planting, Calcium Nitrate during flowering.",
-                pests: "Tomato Hornworm, Aphids",
-                prevention: "Use neem oil spray, introduce ladybugs for natural control."
-            },
-            "Sunflower": {
-                fertilizers: "Nitrogen, Phosphorus, Potassium",
-                time: "Apply Nitrogen at early growth, Phosphorus before flowering.",
-                pests: "Sunflower Moth, Cutworms",
-                prevention: "Use pheromone traps, maintain clean fields."
-            },
-            "Cotton": {
-                fertilizers: "Nitrogen, Phosphorus, Potassium, Zinc",
-                time: "Apply Nitrogen in split doses, Phosphorus at early growth.",
-                pests: "Bollworm, Whiteflies",
-                prevention: "Use resistant varieties, apply bio-pesticides."
-            },
-            "Corn": {
-                fertilizers: "Urea, DAP, Potash",
-                time: "Apply Urea at vegetative stage, DAP before sowing.",
-                pests: "Corn Earworm, Fall Armyworm",
-                prevention: "Use crop rotation, apply biological pesticides."
-            },
-            "Mustard": {
-                fertilizers: "Nitrogen, Phosphorus, Sulphur",
-                time: "Apply Sulphur at flowering, Phosphorus at root development.",
-                pests: "Aphids, Mustard Sawfly",
-                prevention: "Use neem oil, avoid excess nitrogen."
-            },
-            "Barley": {
-                fertilizers: "Urea, DAP, Potash",
-                time: "Apply Urea during early vegetative growth.",
-                pests: "Hessian Fly, Aphids",
-                prevention: "Use resistant varieties, avoid waterlogging."
-            },
-            "Millets": {
-                fertilizers: "Urea, DAP, Zinc",
-                time: "Apply Urea in split doses, Zinc before sowing.",
-                pests: "Shoot Fly, Stemborer",
-                prevention: "Use organic pesticides, maintain field hygiene."
-            },
-            "Groundnut": {
-                fertilizers: "Gypsum, NPK",
-                time: "Apply Gypsum at flowering stage, NPK during early growth.",
-                pests: "Leaf Miner, Red Hairy Caterpillar",
-                prevention: "Use pheromone traps, avoid excess nitrogen."
-            },
-            "Soybean": {
-                fertilizers: "DAP, Potash, Phosphorus",
-                time: "Apply DAP before sowing, Potash at flowering.",
-                pests: "Aphids, Stem Fly",
-                prevention: "Use bio-pesticides, monitor fields regularly."
-            },
-            "Chili": {
-                fertilizers: "NPK, Micronutrients",
-                time: "Apply NPK before flowering, Micronutrients at fruiting stage.",
-                pests: "Thrips, Whiteflies",
-                prevention: "Use yellow sticky traps, neem oil spray."
-            },
-            "Potato": {
-                fertilizers: "Urea, DAP, Potash",
-                time: "Apply DAP before sowing, Urea at tuber formation stage.",
-                pests: "Potato Tuber Moth, Aphids",
-                prevention: "Use proper soil cover, biological control methods."
-            }
-        };
-
-        const crops = Object.keys(cropData);
+        // Static crop list for suggestions
+        const crops = [
+            "Wheat", "Paddy", "Tomato", "Sunflower", "Cotton", "Corn", "Mustard",
+            "Barley", "Millets", "Groundnut", "Soybean", "Chili", "Potato"
+        ];
         let selectedLanguage = 'en';
 
         const translations = {
@@ -509,7 +460,6 @@
         function selectLanguage(lang) {
             selectedLanguage = lang;
             const t = translations[lang];
-            // Update UI translations
             document.getElementById('pageTitle').textContent = t.pageTitle;
             document.getElementById('navbarTitle').textContent = t.navbarTitle;
             document.getElementById('containerTitle').textContent = t.containerTitle;
@@ -521,7 +471,6 @@
             document.getElementById('footerLinkedin').textContent = t.footerLinkedin;
             document.getElementById('footerLocation').textContent = t.footerLocation;
 
-            // Show content
             document.getElementById('languageSelection').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('languageSelection').style.display = 'none';
@@ -532,18 +481,6 @@
                 document.getElementById('mainContent').style.opacity = '1';
                 document.getElementById('footer').style.opacity = '1';
             }, 300);
-
-            // Update current output if any
-            const currentCrop = document.getElementById('cropInput').value;
-            if (currentCrop) {
-                getCropDetails(currentCrop);
-            }
-        }
-
-        function updateLanguage() {
-            const t = translations[selectedLanguage];
-            document.getElementById('navbarTitle').textContent = t.navbarTitle;
-            document.getElementById('cropInput').placeholder = t.placeholder;
 
             const currentCrop = document.getElementById('cropInput').value;
             if (currentCrop) {
@@ -562,6 +499,7 @@
                     let div = document.createElement("div");
                     div.classList.add("suggestion-item");
                     div.innerText = crop;
+                    div.setAttribute("role", "option");
                     div.onclick = () => {
                         document.getElementById("cropInput").value = crop;
                         getCropDetails(crop);
@@ -572,31 +510,43 @@
             }
         }
 
-        function getCropDetails(input) {
+        async function getCropDetails(input) {
             let output = document.getElementById("output");
-            let normalizedInput = input.trim().toLowerCase();
-            let matchedCrop = crops.find(crop => normalizedInput.includes(crop.toLowerCase()));
+            let normalizedInput = input.trim();
+            if (!normalizedInput) {
+                output.innerHTML = `<p>${translations[selectedLanguage].noData}</p>`;
+                return;
+            }
 
-            let normalizedCrop = matchedCrop
-                ? matchedCrop.charAt(0).toUpperCase() + matchedCrop.slice(1).toLowerCase()
-                : null;
-
-            if (normalizedCrop && cropData[normalizedCrop]) {
-                let data = cropData[normalizedCrop];
-                const t = translations[selectedLanguage];
-                let details = `
-                    <h2>${normalizedCrop}</h2>
-                    <p><strong>${t.fertilizers}:</strong> ${data.fertilizers}</p>
-                    <p><strong>${t.applicationTime}:</strong> ${data.time}</p>
-                    <p><strong>${t.commonPests}:</strong> ${data.pests}</p>
-                    <p><strong>${t.prevention}:</strong> ${data.prevention}</p>
-                    <button onclick="speakText()">
-                        <i class="fas fa-volume-up"></i>
-                        <span class="tooltip">${t.listenButton}</span>
-                    </button>
-                `;
-                output.innerHTML = details;
-            } else {
+            output.innerHTML = "<p>Loading...</p>";
+            try {
+                const response = await fetch('/api/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        question: `Provide fertilizer and pest information for ${normalizedInput} in India.`,
+                        language: selectedLanguage === 'en' ? 'en-IN' : 'te-IN'
+                    })
+                });
+                const data = await response.json();
+                if (data.error || !data.fertilizers) {
+                    output.innerHTML = `<p>${translations[selectedLanguage].noData}</p>`;
+                } else {
+                    const t = translations[selectedLanguage];
+                    const details = `
+                        <h2>${normalizedInput}</h2>
+                        <p><strong>${t.fertilizers}:</strong> ${data.fertilizers}</p>
+                        <p><strong>${t.applicationTime}:</strong> ${data.application_time}</p>
+                        <p><strong>${t.commonPests}:</strong> ${data.common_pests}</p>
+                        <p><strong>${t.prevention}:</strong> ${data.prevention}</p>
+                        <button onclick="speakText()" role="button" tabindex="0" aria-label="Listen to information">
+                            <i class="fas fa-volume-up"></i>
+                            <span class="tooltip">${t.listenButton}</span>
+                        </button>
+                    `;
+                    output.innerHTML = details;
+                }
+            } catch (error) {
                 output.innerHTML = `<p>${translations[selectedLanguage].noData}</p>`;
             }
         }
@@ -617,17 +567,28 @@
             };
         }
 
-        function speakText() {
-            let text = document.getElementById('output').innerText;
+        async function speakText() {
+            const text = document.getElementById('output').innerText;
             if (!text.trim()) {
                 alert("No text available for speech.");
                 return;
             }
-            let speech = new SpeechSynthesisUtterance();
-            speech.lang = selectedLanguage === 'en' ? 'en-IN' : 'te-IN';
-            speech.text = text;
-            window.speechSynthesis.cancel();
-            setTimeout(() => window.speechSynthesis.speak(speech), 100);
+            try {
+                const response = await fetch('/tts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: text,
+                        lang: selectedLanguage === 'en' ? 'en-IN' : 'te-IN'
+                    })
+                });
+                const audioBlob = await response.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                audio.play();
+            } catch (error) {
+                alert("Text-to-speech error. Please try again.");
+            }
         }
 
         function scrollToTop() {

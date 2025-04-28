@@ -187,6 +187,7 @@
             border-radius: 8px;
             text-align: left;
             min-height: 100px;
+            position: relative;
         }
 
         #errorMessage {
@@ -259,6 +260,38 @@
 
         .contact-links i {
             margin-right: 0.3rem;
+        }
+
+        .tts-button {
+            background-color: #0288d1;
+            margin-top: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .tts-button:hover {
+            background-color: #0277bd;
+        }
+
+        .loading-spinner {
+            display: none;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #388e3c;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
         @media (max-width: 600px) {
@@ -353,7 +386,9 @@
                 <button id="voiceQuestionButton"><img src="https://img.icons8.com/ios-filled/30/ffffff/microphone.png" class="icon" alt="Mic"></button>
                 <button class="submit-button" onclick="askQuestion()">Ask</button>
             </div>
-            <div id="outputArea"></div>
+            <div id="outputArea">
+                <div class="loading-spinner" id="loadingSpinner"></div>
+            </div>
             <div id="errorMessage"></div>
         </div>
     </div>
@@ -362,7 +397,7 @@
     <footer id="footer">
         <p id="teamDesc"></p>
         <div class="contact-links">
-            <a href="mailto:shivakumar.working@gmail.com"><i class="fas fa-envelope"></i><span id="footerEmail"></span></a>
+            <a href="/cdn-cgi/l/email-protection#0d7e65647b6c6678606c7f237a627f6664636a4d6a606c6461236e6260"><i class="fas fa-envelope"></i><span id="footerEmail"></span></a>
             <a href="https://github.com/shivkumars005" target="_blank"><i class="fab fa-github"></i><span id="footerGithub"></span></a>
             <a href="https://linkedin.com/in/shivakumarsouta" target="_blank"><i class="fab fa-linkedin"></i><span id="footerLinkedin"></span></a>
             <a href="#"><i class="fas fa-map-marker-alt"></i><span id="footerLocation"></span></a>
@@ -371,46 +406,6 @@
 
     <script>
         let currentLanguage = null;
-
-        // Mock data for crop-related questions
-        const mockData = {
-            'en-US': [
-                {
-                    question: 'what is crop rotation',
-                    answer: 'Crop rotation is the practice of growing different crops in succession on the same land to improve soil health, reduce pests, and increase yields. For example, in India, rotating rice with pulses like lentils or chickpeas is common.'
-                },
-                {
-                    question: 'best crops for monsoon',
-                    answer: 'During the monsoon season in India, suitable crops include rice, maize, millets, and pulses like moong dal. These crops thrive in wet conditions and are widely grown in regions like Punjab and Maharashtra.'
-                },
-                {
-                    question: 'how to improve soil fertility',
-                    answer: 'To improve soil fertility, use organic manure, compost, or green manure crops like dhaincha. Crop rotation with legumes and reduced chemical fertilizers also helps. Vermicomposting is popular in India.'
-                },
-                {
-                    question: 'pests affecting rice',
-                    answer: 'Common pests affecting rice in India include stem borers, leaf folders, and brown plant hoppers. Integrated pest management, like using neem-based pesticides and resistant varieties, can control them.'
-                }
-            ],
-            'te-IN': [
-                {
-                    question: 'పంటల మార్పిడి అంటే ఏమిటి',
-                    answer: 'పంటల మార్పిడి అనేది నేల ఆరోగ్యాన్ని మెరుగుపరచడానికి, తెగుళ్లను తగ్గించడానికి మరియు దిగుబడిని పెంచడానికి ఒకే భూమిలో వివిధ పంటలను వరుసగా పండించే పద్ధతి. ఉదాహరణకు, భారతదేశంలో వరి తర్వాత కందిపప్పు లేదా శనగలు పండించడం సాధారణం.'
-                },
-                {
-                    question: 'వర్షాకాలంలో ఉత్తమ పంటలు',
-                    answer: 'భారతదేశంలో వర్షాకాలంలో వరి, మొక్కజొన్న, చిరుధాన్యాలు మరియు ముంగ్ దాల్ వంటి కాయధాన్యాలు అనుకూలమైన పంటలు. ఈ పంటలు తడి పరిస్థితుల్లో బాగా పెరుగుతాయి మరియు పంజాబ్, మహారాష్ట్రలలో విస్తృతంగా పండిస్తారు.'
-                },
-                {
-                    question: 'నేల సారవంతతను ఎలా మెరుగుపరచాలి',
-                    answer: 'నేల సారవంతతను మెరుగుపరచడానికి సేంద్రియ ఎరువు, కంపోస్ట్ లేదా ధైంచా వంటి ఆకుపచ్చ ఎరువు పంటలను ఉపయోగించండి. కాయధాన్యాలతో పంటల మార్పిడి మరియు రసాయన ఎరువులను తగ్గించడం కూడా సహాయపడుతుంది. భారతదేశంలో వర్మీకంపోస్టింగ్ ప్రసిద్ధం.'
-                },
-                {
-                    question: 'వరిని ప్రభావితం చేసే తెగుళ్లు',
-                    answer: 'భారతదేశంలో వరిని ప్రభావితం చేసే సాధారణ తెగుళ్లలో కాండం తొలిచే పురుగులు, ఆకు మడత పురుగులు మరియు గోధుమ రంగు మొక్కల గొల్లభామలు ఉన్నాయి. వేప ఆధారిత పురుగుమందులు మరియు నిరోధక రకాలను ఉపయోగించి సమగ్ర తెగులు నిర్వహణ ద్వారా వాటిని నియంత్రించవచ్చు.'
-                }
-            ]
-        };
 
         const uiTranslations = {
             'en-US': {
@@ -427,7 +422,8 @@
                 footerEmail: 'Email',
                 footerGithub: 'GitHub',
                 footerLinkedin: 'LinkedIn',
-                footerLocation: 'Hyderabad, Telangana'
+                footerLocation: 'Hyderabad, Telangana',
+                playAnswer: 'Play Answer'
             },
             'te-IN': {
                 pageTitle: 'పంటల Q&A బాట్ | క్రాప్‌కనెక్ట్AI',
@@ -443,7 +439,8 @@
                 footerEmail: 'ఇమెయిల్',
                 footerGithub: 'గిట్‌హబ్',
                 footerLinkedin: 'లింక్డ్‌ఇన్',
-                footerLocation: 'హైదరాబాద్, తెలంగాణ'
+                footerLocation: 'హైదరాబాద్, తెలంగాణ',
+                playAnswer: 'సమాధానం ప్లే చేయండి'
             }
         };
 
@@ -515,38 +512,68 @@
             const question = document.getElementById('questionInput').value.trim();
             const outputArea = document.getElementById('outputArea');
             const errorMessage = document.getElementById('errorMessage');
+            const loadingSpinner = document.getElementById('loadingSpinner');
             const t = uiTranslations[currentLanguage];
 
-            outputArea.innerHTML = '';
+            outputArea.innerHTML = '<div class="loading-spinner" id="loadingSpinner"></div>';
             errorMessage.innerText = '';
 
             if (!question) {
                 showMessage(t.noQuestion, 'error');
+                outputArea.innerHTML = '';
                 return;
             }
 
             showMessage(t.fetchingAnswer, 'info');
+            loadingSpinner.style.display = 'block';
 
             try {
-                // Simulate async behavior for consistency
-                await new Promise(resolve => setTimeout(resolve, 500));
+                const response = await fetch('/api/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ question, language: currentLanguage })
+                });
 
-                // Find answer in mock data (case-insensitive, partial match)
-                const questions = mockData[currentLanguage];
-                const normalizedQuestion = question.toLowerCase();
-                const match = questions.find(item => 
-                    item.question.toLowerCase().includes(normalizedQuestion) ||
-                    normalizedQuestion.includes(item.question.toLowerCase())
-                );
+                const data = await response.json();
 
-                const answer = match ? match.answer : t.noAnswer;
-
-                outputArea.innerHTML = `<p>${answer}</p>`;
-                showMessage('Answer fetched successfully', 'success');
+                if (response.ok) {
+                    outputArea.innerHTML = `<p>${data.answer}</p><button class="tts-button" onclick="playTTS('${encodeURIComponent(data.answer)}')"><i class="fas fa-volume-up"></i> ${t.playAnswer}</button>`;
+                    showMessage('Answer fetched successfully', 'success');
+                } else {
+                    throw new Error(data.error || t.noAnswer);
+                }
             } catch (error) {
-                console.error('Error processing question:', error);
+                console.error('Error fetching answer:', error);
                 showMessage(t.noAnswer, 'error');
                 outputArea.innerHTML = `<p>${t.noAnswer}</p>`;
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        async function playTTS(answer) {
+            try {
+                const response = await fetch('/tts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text: decodeURIComponent(answer), lang: currentLanguage })
+                });
+
+                if (response.ok) {
+                    const audioBlob = await response.blob();
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const audio = new Audio(audioUrl);
+                    audio.play();
+                } else {
+                    showMessage('Failed to generate audio', 'error');
+                }
+            } catch (error) {
+                console.error('TTS error:', error);
+                showMessage('Failed to generate audio', 'error');
             }
         }
 
