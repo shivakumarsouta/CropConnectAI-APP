@@ -1,4 +1,6 @@
-flask
-googletrans
-gtts
-gunicorn==20.1.0
+Flask==3.1.1
+flask-cors==6.0.1
+google-generativeai==0.8.5
+gTTS==2.5.4
+Jinja2==3.1.6
+requests==2.32.4
