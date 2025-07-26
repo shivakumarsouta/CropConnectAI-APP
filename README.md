@@ -1,4 +1,4 @@
-# CropConnect
+# CropConnectAI
 
 CropConnect is a platform designed to connect farmers with buyers, providing a seamless and efficient way to trade agricultural products. Our mission is to empower farmers by giving them direct access to markets and fair prices for their produce.
 
@@ -9,6 +9,10 @@ CropConnect is a platform designed to connect farmers with buyers, providing a s
 - **Search and Filter**: Buyers can search for products and filter results based on various criteria.
 - **Messaging System**: Direct communication between farmers and buyers.
 - **Order Management**: Track orders from placement to delivery.
+
+## Hosted Online
+
+- The application is live at [CropConnectAI](https://cropconnectai.onrender.com)
 
 ## Installation
 
